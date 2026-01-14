@@ -84,7 +84,11 @@ public class Controller {
         view.getBtnEgale().addActionListener(e->{
             String aCalculer=view.getAffichage().getText();
             String resultat=model.calculer(aCalculer);
-            if(resultat.contains("Erreur")){
+            if(resultat.contains("Erreur") || resultat.contains("seulement")
+                    
+                    
+                    
+                    ){
                 JDialog erreur=new JDialog(view);
                 erreur.setSize(400,100);
                 erreur.add(new JLabel(resultat));

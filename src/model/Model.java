@@ -56,6 +56,24 @@ public class Model {
             operation=operation.replace(target, target2);
             matcher=pattern.matcher(operation);
         }
+        
+        
+        
+        
+        
+        
+        while(operation.contains("ππ")){
+            operation=operation.replace("ππ", "π*π");
+        }
+        while(operation.contains("ee")){
+            operation=operation.replace("ee", "e*e");
+        }
+        while(operation.contains("eπ")){
+            operation=operation.replace("eπ", "e*π");
+        }
+        while(operation.contains("πe")){
+            operation=operation.replace("πe", "π*e");
+        }
         //Gerer la multiplication des constantes exemple 3π4->3*π*4
         operation=gereMultiplicationImplicit(operation, "\\d", "π");
         operation=gereMultiplicationImplicit(operation, "\\d", "e");
@@ -102,7 +120,7 @@ public class Model {
         }
         //Calculer les valeur numerique des fonction exemple fact(4)=24
         for(String fonction:fonctionSpeciale){
-            pattern=Pattern.compile(fonction+"-?\\d+\\.?\\d+");
+            pattern=Pattern.compile(fonction+"-?\\d+\\.?\\d*");
             matcher=pattern.matcher(operation);
             while(matcher.find()){
                 String target=matcher.group();
@@ -138,7 +156,7 @@ public class Model {
             }
         }
         for(String fonction:fonctionTrigo){
-            pattern=Pattern.compile(fonction+"-?\\d+\\.?\\d+");
+            pattern=Pattern.compile(fonction+"-?\\d+\\.?\\d*");
             matcher=pattern.matcher(operation);
             while(matcher.find()){
                 String target=matcher.group();
@@ -354,7 +372,7 @@ public class Model {
     
     private String arcTanH(double x){
         if(x<=-1 || x>=1 ){
-            return "atan(h) seulement pour x entre -1 et 1";
+            return "atanh(x) seulement pour x entre -1 et 1";
         }
         return 0.5*Math.log((1+x)/(1-x))+"";
     }
