@@ -85,7 +85,7 @@ public class View extends javax.swing.JFrame {
         jPanel1.setBackground(new java.awt.Color(51, 51, 0));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        affichage.setFont(new java.awt.Font("3270 Nerd Font", 0, 48)); // NOI18N
+        affichage.setFont(new java.awt.Font("Consolas", 0, 36)); // NOI18N
         jPanel1.add(affichage, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 270, 40));
 
         btnPlus.setBackground(new java.awt.Color(102, 102, 102));
