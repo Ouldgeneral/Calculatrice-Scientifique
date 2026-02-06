@@ -1,4 +1,7 @@
 package outils;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,9 +14,11 @@ import java.util.ArrayList;
  */
 public class BaseDonne {
     Connection con;
+    String emplacementApp=System.getenv("APPDATA")+"\\IteemFX2506CalculatrisceSci\\";
     public BaseDonne(){
-        String baseDeDonne="jdbc:sqlite:historiqueCalculatrice.db";
         try {
+            Files.createDirectories(Paths.get(emplacementApp));
+            String baseDeDonne="jdbc:sqlite:"+emplacementApp+"historiqueCalculatrice.db";
             con=DriverManager.getConnection(baseDeDonne);
             if(con!=null){
                 String sql="CREATE TABLE IF NOT EXISTS historique (id INTEGER PRIMARY KEY AUTOINCREMENT ,expression TEXT NOT NULL );";
@@ -21,8 +26,7 @@ public class BaseDonne {
                 stmt = con.createStatement();
                 stmt.execute(sql);
             }
-        } catch (SQLException ex) {
-
+        } catch (SQLException | IOException ex) {
         }
     }
     public void insererExpression(String expression){

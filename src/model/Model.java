@@ -235,7 +235,7 @@ public class Model {
     private String detecteEtGereParenthese(String texte){
         List<String> expressions=new ArrayList<>();
         //Gerer le cas parenthese simple (2)->2
-        pattern=Pattern.compile("[(]\\d+\\.?\\d*[)]");
+        pattern=Pattern.compile("[(]\\d+\\.?\\d*\\!*[)]");
         matcher=pattern.matcher(texte);
         while(matcher.find()){
             expressions.add(matcher.group());
@@ -244,7 +244,7 @@ public class Model {
         for(String expression:expressions){
             String sansParenthese=expression.replace("(", "");
             sansParenthese=sansParenthese.replace(")", "");
-            texte=texte.replace(expression, faitCalcule(sansParenthese));
+            texte=texte.replace(expression,expression.contains("!")?factorielle(Double.parseDouble(sansParenthese.replace("!", ""))):faitCalcule(sansParenthese));
         }
         pattern=Pattern.compile("[(][-?\\d+\\.?\\d*[\\/\\*\\+\\-\\^]*\\d*\\.?\\d*]+[)]");
         matcher=pattern.matcher(texte);
@@ -269,83 +269,55 @@ public class Model {
     private String faitCalcule(String x){
         if(x.contains("∞"))return x;
         if(x.contains("Infinity"))return (x.startsWith("-"))?"-∞":"+∞";
-        x=x.replace("E+", "E");//remplacer l'exposant positif 
         if(x.startsWith("+"))x=x.substring(1);//A ne surtout pas effacer
-        //Cette partie s'occupe de la gestion de la puissance negative
-        int indexPuisanceNegative=x.indexOf("^-");
-        if(indexPuisanceNegative>0){
-            pattern=Pattern.compile("\\-?\\d+\\.?\\d*\\^\\-?\\d+\\.?\\d*");
-            matcher=pattern.matcher(x);
-            while(matcher.find()){
-                String target=matcher.group();
-                String target2=target.replace("^-", "^");
-                target2="1/"+faitCalcule(target2);
-                x=x.replace(target, target2);
-                matcher=pattern.matcher(x);
-            }
-        }
         if(x.contains("(") && x.contains(")") && (x.indexOf("(")<x.indexOf(")")))x=detecteEtGereParenthese(x);
         //Partie principale du calcule 
-        double resultat;
-        String[] operations={"E-","\\+","\\-","\\*","\\/","\\^"};//Liste des operations fondamentale +-*/ et ^ pour la puissance
-        String[] bornes=new String[2];
-        String operationActuelle="";
-        
+        String[] operations={"\\^-","\\^+","\\^","E-","E+","E","\\*","\\/","\\-","\\+"};//Liste des operations fondamentale +-*/ et ^ pour la puissance
         for(String operation:operations){
-            bornes=x.split(operation,2);
-            if(bornes.length==2 &&!"".equals(bornes[0])){
-                operationActuelle=operation.replace("\\", "");
-                break;
+            Pattern p=Pattern.compile("\\-?\\d+\\.?\\d*"+operation+"\\-?\\d+\\.?\\d*");
+            Matcher m=p.matcher(x);
+            while(m.find()){
+                String expression=m.group();
+                x=x.replace(expression,evaluer(expression,operation));
+                m=p.matcher(x);
             }
         }
-        double nombre1=0;
-        double nombre2=0;
-        if(!"".equals(operationActuelle) && bornes.length>=2){
-            
-            try{
-                nombre1=Double.parseDouble(bornes[0]);
-            }catch(NumberFormatException e){
-                try{
-                    nombre1=Double.parseDouble(calculer(bornes[0]));
-                }catch(NumberFormatException xs){
-                    return "Syntax Error";
-                    
-                }
-            }
-            try{
-                nombre2=Double.parseDouble(bornes[1]);
-            }catch(NumberFormatException e){
-                try{
-                    nombre2=Double.parseDouble(faitCalcule("-".equals(operationActuelle)?calculer("-"+bornes[1]):bornes[1]));
-                    nombre2=("-".equals(operationActuelle))?-nombre2:nombre2;
-                }catch(NumberFormatException xs){
-                    return "Syntax Error";
-                }
-            }
+        try{
+            Double.valueOf(x);
+        }catch(NumberFormatException ex){
+            return (x.equalsIgnoreCase("impossible")?x:"Syntax Error");
         }
-        
-        switch (operationActuelle) {
+        return x;
+    } 
+    
+    
+    //Fonction qui evalues les expression a+b->r ou r est le resultat
+    private String evaluer(String expression,String operation){
+        double resultat=0;
+        boolean n1negatif=false;
+        if(expression.startsWith("\\-")){
+            expression=expression.substring(1);
+            n1negatif=true;
+        }
+        String[] bornes=expression.split(operation,2);
+        double nombre1=Double.parseDouble(bornes[0]);
+        if(n1negatif)nombre1=-nombre1;
+        double nombre2=Double.parseDouble(bornes[1]);
+        operation=operation.replace("\\", "");
+         switch (operation) {
             case "E-" -> resultat=nombre1*Math.pow(10, -nombre2);
+            case "E" ,"E+"-> resultat=nombre1*Math.pow(10, nombre2);
             case "+" -> resultat=nombre1+nombre2;
             case "-" -> resultat=nombre1-nombre2;
             case "*" -> resultat=nombre1*nombre2;
             case "/" -> {
                 if(nombre2==0)return "Impossible";
                 resultat=nombre1/nombre2;}
-            case "^" -> resultat=Math.pow(nombre1, nombre2);
-            default -> {
-                try{
-                    resultat=Double.parseDouble(x);
-                }catch(NumberFormatException e){
-                    return "Syntax Error";
-                }
-            }
+            case "^-" -> resultat=Math.pow(nombre1, -nombre2);
+            case "^" ,"^+"-> resultat=Math.pow(nombre1, nombre2);
         }
         return resultat+"";
-    } 
-    
-    
-    
+    }
     //Fonctions non standardiser dans la bibliotheque Math de java
     private String factorielle(double number){
         if(number<0)return "ErreurNegatif(Factorielle nombre negatif";
