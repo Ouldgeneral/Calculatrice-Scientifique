@@ -137,15 +137,15 @@ public class Controller {
             unite.addActionListener(e->model.setUniteAngle(unite.getActionCommand()));
         }
         view.getHistorique().addActionListener((e) -> {
-            historique(e);
+            historique(view.getHistorique());
         });
     }
-    private void historique(ActionEvent e){
-        String selection=(String)((JComboBox)e.getSource()).getSelectedItem();
+    private void historique(JComboBox<String> listeHistorique){
+        String selection=(String)listeHistorique.getSelectedItem();
             if(selection.equals("ViderHistorique")){
-                ((JComboBox)e.getSource()).removeAllItems();
-                ((JComboBox)e.getSource()).addItem("0");
-                ((JComboBox)e.getSource()).addItem("ViderHistorique");
+                listeHistorique.removeAllItems();
+                listeHistorique.addItem("0");
+                listeHistorique.addItem("ViderHistorique");
                 historique.effacerHistorique();
                 return;
             }
